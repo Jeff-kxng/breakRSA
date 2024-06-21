@@ -1,44 +1,38 @@
 import gmpy2
 
-# Define the values of N, y, and e
+def factorize(N):
+    sqrt_24N = gmpy2.isqrt(24 * N)
+    A = gmpy2.mpz(sqrt_24N) + 1
+
+    while True:
+        x_squared = A * A - 24 * N
+        x = gmpy2.isqrt(x_squared)
+
+        if x * x == x_squared:
+            # Checking conditions based on the properties derived
+            print("(A + x) % 3 =", (A + x) % 3)
+            print("(A + x) % 2 =", (A + x) % 2)
+            print(
+                "Since (A + x) is congruent to 2 modulo 3 and divisible by 2, we have x = 2q - 3p, where A + x = 4q and A - x = 6p"
+            )
+            p = (A + x) // 4
+            q = (A - x) // 6
+
+            if p * q == N:
+                return p, q
+
+        A += 1
+
+# RSA modulus N
 N = gmpy2.mpz(
-    "179769313486231590772930519078902473361797697894230657273430081157732675805505620686985379449212982959585501387537164015710139858647833778606925583497541085196591615128057575940752635007475935288710823649949940771895617054361149474865046711015101563940680527540071584560878577663743040086340742855278549092581"
+    "720062263747350425279564435525583738338084451473999841826653057981916355690188337790423408664187663938485175264994017897083524079135686877441155132015188279331812309091996246361896836573643119174094961348524639707885238799396839230364676670221627018353299443241192173812729276147530748597302192751375739387929"
 )
-y = gmpy2.mpz(
-    "22096451867410381776306561134883418017410069787892831071731839143676135600120538004282329650473509424343946219751512256465839967942889460764542040581564748988013734864120452325229320176487916666402997509188729971690526083222067771600019329260870009579993724077458967773697817571267229951148662959627934791540"
-)
-e = gmpy2.mpz(65537)
 
-# Find sqrt_N and set up A
-sqrt_N = gmpy2.isqrt(N)
-A = sqrt_N + 1
+# Factorize N into p and q
+p, q = factorize(N)
 
-# Find x such that x^2 = A^2 - N
-x = gmpy2.isqrt(A**2 - N)
-
-# Calculate factors p and q
-p = A - x
-q = A + x
-
-# Calculate phi(N)
-phi_N = (p - 1) * (q - 1)
-
-# Calculate the private key d
-d = gmpy2.invert(e, phi_N)
-
-# Decrypt y to find x
-x = gmpy2.powmod(y, d, N)
-
-# Convert x to hexadecimal representation
-hex_x = x.digits(16)
-
-# Find the position of '00' in hex_x and extract the message
-position_m = hex_x.find("00")
-m = hex_x[position_m + 2:]
-
-# Print the results
-print("hex_x =", hex_x)
-print("Length of hex_x:", len(hex_x))
-print("Notice the odd length due to the initial '0x00' and '0x02' removed during decryption.")
-print("Position of the 2nd '0x00':", position_m)
-print("The plaintext is:", bytes.fromhex(m).decode("ascii"))
+# Check if p and q are prime
+print("p is prime: ", gmpy2.is_prime(p))
+print("q is prime: ", gmpy2.is_prime(q))
+print(f"p: {p}")
+print(f"q: {q}")
